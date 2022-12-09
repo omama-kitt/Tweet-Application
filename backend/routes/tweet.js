@@ -14,10 +14,10 @@ var con = mysql.createConnection({
   database: "tweetapplication"
 });
 
-// add tweet    
+//  Add new tweet.   
 router.post("/addtweet",function(request, response){
 
-  var id =request.body.id;
+  //var id =request.body.id;
   var UserId =request.body.UserId;
   var Description =request.body.Description;
   var Hashtag =request.body.Hashtag;
@@ -26,7 +26,7 @@ router.post("/addtweet",function(request, response){
   con.connect(function(err) {
     if (err) throw err;
     console.log("Connected!");
-    var sql = "INSERT INTO tweets (id, UserId,Description,Hashtag,Date) VALUES ('"+id+"', '"+UserId+"','"+Description+"','"+Hashtag+"','"+Date+"')";
+    var sql = "INSERT INTO tweets ( UserId,Description,Hashtag,Date) VALUES ( '"+UserId+"','"+Description+"','"+Hashtag+"','"+Date+"')";
     con.query(sql, function (err, result) {
       if (err) throw err;
       console.log("Tweet added successfulley");
@@ -34,18 +34,18 @@ router.post("/addtweet",function(request, response){
     });
   });
 });
-// update tweet 
+// Edit a tweet.
 router.post("/updatetweet/:id",function(request, response){
 
   var id =request.params.id;
-  var UserId =request.body.UserId;
+ // var UserId =request.body.UserId;
   var Description =request.body.Description;
   var Hashtag =request.body.Hashtag;
   var Date =request.body.Date;
 
   con.connect(function(err) {
     if (err) throw err;
-    var sql = "UPDATE tweets SET UserId = '"+UserId+"',Description = '"+Description+"',Hashtag = '"+Hashtag+"',Date = '"+Date+"'  WHERE id = '"+id+"'";
+    var sql = "UPDATE tweets SET Description = '"+Description+"',Hashtag = '"+Hashtag+"',Date = '"+Date+"'  WHERE id = '"+id+"'";
     con.query(sql, function (err, result) {
       if (err) throw err;
       console.log(result.affectedRows + " record(s) updated");
@@ -53,7 +53,7 @@ router.post("/updatetweet/:id",function(request, response){
     });
   });
 });
-//delete 
+//Delete a tweet.
 router.delete("/deletetweet",function (request, response){
 
   var id =request.body.id;
@@ -69,6 +69,33 @@ router.delete("/deletetweet",function (request, response){
   });
   
 });
+// Retrieve all tweets (use paging)
+router.post("/RetAlltweets/:page/:limit",function (request, response){
+
+  var UserId =request.body.UserId;
+
+  var page =request.params.page;
+  var limit =request.params.limit;
+
+  const startIndex = (page -1)* limit;
+  const endIndex = page * limit;
+ 
+
+  con.connect(function(err) {
+    if (err) throw err;
+    var sql = "SELECT * FROM tweets WHERE UserId = '"+UserId+"'";
+    con.query(sql, function (err, result) {
+      if (err) throw err;
+      console.log("Retrieve all tweets successfulley");
+      const resultusers = result.slice(startIndex , endIndex)
+      response.json(resultusers)
+      //response.send({result});
+    });
+  });
+  
+});
 //////////////////////////////////////////////////////////////////////////////////////
+
+
 
 module.exports = router;
