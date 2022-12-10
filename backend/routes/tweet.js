@@ -79,18 +79,17 @@ router.post("/RetAlltweets/:page/:limit",function (request, response){
 
   const startIndex = (page -1)* limit;
   const endIndex = page * limit;
- 
 
   con.connect(function(err) {
     if (err) throw err;
-    var sql = "SELECT * FROM tweets WHERE UserId = '"+UserId+"'";
-    con.query(sql, function (err, result) {
+    var sql1 = "SELECT * FROM tweets WHERE UserId = '"+UserId+"' and id not IN (SELECT tweetid FROM hiddentweets WHERE UserId = '"+UserId+"')";
+    con.query(sql1, function (err, result) {
       if (err) throw err;
       console.log("Retrieve all tweets successfulley");
       const resultusers = result.slice(startIndex , endIndex)
       response.json(resultusers)
-      //response.send({result});
-    });
+      
+  });
   });
   
 });
