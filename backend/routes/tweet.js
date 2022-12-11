@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require("../config/dbconfig");
 const orderBy=require("lodash/orderBy");
-
+const jwt = require('jsonwebtoken');
 
 // connect with database
 var mysql = require('mysql');
@@ -18,15 +18,32 @@ var con = mysql.createConnection({
 router.post("/addtweet",function(request, response){
 
   //var id =request.body.id;
-  var UserId =request.body.UserId;
+ // var UserId =request.body.UserId;
   var Description =request.body.Description;
   var Hashtag =request.body.Hashtag;
   var Date =request.body.Date;
 
+   //////////////////////
+   console.log("OK1");
+   if(
+     !request.headers.authorization ||
+     !request.headers.authorization.startsWith('Bearer') ||
+     !request.headers.authorization.split(' ')[1]
+ ){
+     return response.status(422).json({
+         message: "Please provide the token",
+     });
+ }
+ console.log("OK");
+ const theToken = request.headers.authorization.split(' ')[1];
+ const decoded = jwt.verify(theToken, 'SECRETKEY');
+ console.log(decoded.id);
+ ///////////////////////////////
+ console.log("OK2");
   con.connect(function(err) {
     if (err) throw err;
     console.log("Connected!");
-    var sql = "INSERT INTO tweets ( UserId,Description,Hashtag,Date) VALUES ( '"+UserId+"','"+Description+"','"+Hashtag+"','"+Date+"')";
+    var sql = "INSERT INTO tweets ( UserId,Description,Hashtag,Date) VALUES ( '"+decoded.id+"','"+Description+"','"+Hashtag+"','"+Date+"')";
     con.query(sql, function (err, result) {
       if (err) throw err;
       console.log("Tweet added successfulley");
@@ -57,7 +74,7 @@ router.post("/updatetweet/:id",function(request, response){
 router.delete("/deletetweet",function (request, response){
 
   var id =request.body.id;
-
+  
   con.connect(function(err) {
     if (err) throw err;
     var sql = "DELETE FROM tweets WHERE id = '"+id+"' ";
